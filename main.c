@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
-
+//Code_Lex ENUM
 typedef enum {
     PROGRAM_TOKEN,
     VAR_TOKEN,
@@ -36,6 +36,42 @@ typedef enum {
     DIEZE_TOKEN,
     ERR_TOKEN  // For undefined or error tokens
 } CODE_LEX;
+
+
+//CODE_ERROR
+typedef enum {
+    PROGRAM_ERROR,
+    VAR_ERROR,
+    CONST_ERROR,
+    PV_ERROR,
+    ID_ERROR,
+    PRG_ERROR,
+    PRD_ERROR,
+    END_ERROR,
+    EGAL_ERROR,
+    BEGIN_ERROR,
+    VIRG_ERROR,
+    AFFECT_ERROR,
+    THEN_ERROR,
+    IF_ERROR,
+    WHILE_ERROR,
+    WRITE_ERROR,
+    READ_ERROR,
+    DO_ERROR,
+    NUM_ERROR,
+    PT_ERROR,
+    PLUS_ERROR,
+    DIFF_ERROR,
+    SUP_ERROR,
+    INF_ERROR,
+    INFEG_ERROR,
+    SUPEG_ERROR,
+    MOINS_ERROR,
+    MULTI_ERROR,
+    DIV_ERROR,
+    DIEZE_ERROR,
+    ERR_ERROR  // For undefined or error tokens
+} CODE_ERROR;
 
 
 typedef struct {
@@ -138,8 +174,49 @@ void AfficherToken(TSym_Cour SYM) {
 }
 
 
+void DisplayError(CODE_ERROR error) {
+    switch(error) {
+        case PROGRAM_ERROR:   printf("PROGRAM_ERROR\n"); break;
+        case VAR_ERROR:       printf("VAR_ERROR\n");     break;
+        case CONST_ERROR:     printf("CONST_ERROR\n");   break;
+        case PV_ERROR:        printf("PV_ERROR\n");      break;
+        case ID_ERROR:        printf("ID_ERROR\n");      break;
+        case PRG_ERROR:       printf("PRG_ERROR\n");     break;
+        case PRD_ERROR:       printf("PRD_ERROR\n");     break;
+        case END_ERROR:       printf("END_ERROR\n");     break;
+        case EGAL_ERROR:      printf("EGAL_ERROR\n");    break;
+        case BEGIN_ERROR:     printf("BEGIN_ERROR\n");   break;
+        case VIRG_ERROR:      printf("VIRG_ERROR\n");    break;
+        case AFFECT_ERROR:    printf("AFFECT_ERROR\n");  break;
+        case THEN_ERROR:      printf("THEN_ERROR\n");    break;
+        case IF_ERROR:        printf("IF_ERROR\n");      break;
+        case WHILE_ERROR:     printf("WHILE_ERROR\n");   break;
+        case WRITE_ERROR:     printf("WRITE_ERROR\n");   break;
+        case READ_ERROR:      printf("READ_ERROR\n");    break;
+        case DO_ERROR:        printf("DO_ERROR\n");      break;
+        case NUM_ERROR:       printf("NUM_ERROR\n");     break;
+        case PT_ERROR:        printf("PT_ERROR\n");      break;
+        case PLUS_ERROR:      printf("PLUS_ERROR\n");    break;
+        case DIFF_ERROR:      printf("DIFF_ERROR\n");    break;
+        case SUP_ERROR:       printf("SUP_ERROR\n");     break;
+        case INF_ERROR:       printf("INF_ERROR\n");     break;
+        case INFEG_ERROR:     printf("INFEG_ERROR\n");   break;
+        case SUPEG_ERROR:     printf("SUPEG_ERROR\n");   break;
+        case MOINS_ERROR:     printf("MOINS_ERROR\n");   break;
+        case MULTI_ERROR:     printf("MULTI_ERROR\n");   break;
+        case DIV_ERROR:       printf("DIV_ERROR\n");     break;
+        case DIEZE_ERROR:     printf("DIEZE_ERROR\n");   break;
+        default:              printf("ERR_ERROR\n");     break;
+    }
+}
 
-
+void Test_Symbole(CODE_LEX cl,CODE_ERROR error){
+    if (TokenArr[index_token] == cl){
+        index_token++
+    }else{
+        DisplayError(error);
+    }
+}
 
 
 
@@ -173,6 +250,7 @@ void analyseur_lexical(FILE* fichier){
             else if (strcmp(SYM.nom, "begin") == 0) SYM.Code = BEGIN_TOKEN;
             else if (strcmp(SYM.nom, "end") == 0) SYM.Code = END_TOKEN;
             else if (strcmp(SYM.nom, "read") == 0) SYM.Code = READ_TOKEN;
+
             else SYM.Code = ID_TOKEN;
 
             AfficherToken(SYM);
@@ -272,10 +350,102 @@ void analyseur_lexical(FILE* fichier){
                 break;
         }
 
+    }
+}
+
+void Sym_Suiv(){
+    index_token++;
+}
+
+void analyseur_syntaxique(){
+    TSym_Cour SYM;
+
+    //Program function
+
+    void PROGRAM(){
+        Test_Symbole(PROGRAM_TOKEN,PROGRAM_ERROR);
+        Test_Symbole(ID_TOKEN,ID_ERROR);
+        Test_Symbole(PV_TOKEN,PV_ERROR);
+        BLOCK();
+        Test_Symbole(PT_TOKEN,PT_ERROR);
+    }
+
+    // BLOCK Program
+
+
+    void BLOCK(){
+        CONSTS();
+        VARS();
+        INSTS();
+    }
+
+    //1-CONSTS func
+    void CONSTS(){
+        switch(SYM.Code){
+         case CONST_TOKEN:Sym_Suiv();
+             Test_Symbole(ID_TOKEN,ID_ERROR);
+             Test_Symbole(EGAL_TOKEN,EGAL_ERROR);
+             Test_Symbole(NUM_TOKEN,NUM_ERROR);
+             Test_Symbole(PV_TOKEN,PV_ERROR);
+             while(SYM.Code == ID_TOKEN){
+                Sym_Suiv();
+                Test_Symbole(EGAL_TOKEN,EGAL_ERROR);
+                Test_Symbole(NUM_TOKEN,NUM_ERROR);
+                Test_Symbole(PV_TOKEN,PV_ERROR);
+             };break;
+        case VAR_TOKEN:break;
+        case BEGIN_TOKEN;break;
+        default:
+         printf("CONST_VAR_BEGIN_ERR \ntriggered from consts function");
+
+        }
+
+    }
+
+//2-VARS func
+    void VARS(){
+        switch(SYM.Code){
+        case VAR_TOKEN:
+            Sym_Suiv();
+            Test_Symbole(ID_TOKEN,ID_ERROR);
+            while (SYM.Code == PV_TOKEN){
+                Sym_Suiv();
+                Test_Symbole(ID_TOKEN,ID_ERROR);
+            }
+        case CONST_TOKEN:break;
+        case BEGIN_TOKEN:break;
+        default:
+            printf("CONST_VAR_BEGIN_ERR \ntriggered from VARS function");
+        }
+
+    }
+
+
+//3-INSTS func
+    void INSTS(){
+        Test_Symbole(BEGIN_TOKEN,BEGIN_ERROR);
+        INST();
+
+    }
+
 }
 
 
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -285,7 +455,14 @@ int main(){
     FILE* fptr = fopen("testfile.txt","r");
 
     analyseur_lexical(fptr);
-    printf("Voici le resultat du tableau");
+   /**/
+
+    return 0;
+
+}
+
+
+/* printf("Voici le resultat du tableau");
 
     int j=0;
     printf("\n");
@@ -294,8 +471,5 @@ int main(){
         printf("%s\n",getTokenString(TokenArr[j]));
         j++;
     }
+*/
 
-
-    return 0;
-
-}
