@@ -212,7 +212,7 @@ void DisplayError(CODE_ERROR error) {
 
 void Test_Symbole(CODE_LEX cl,CODE_ERROR error){
     if (TokenArr[index_token] == cl){
-        index_token++
+        index_token++;
     }else{
         DisplayError(error);
     }
@@ -235,9 +235,10 @@ void analyseur_lexical(FILE* fichier){
         if(isspace(c)) continue;
 
         if(isalpha(c)){
+
             int i = 0;
             SYM.nom[i++] = c;
-            while (isalpha( (c = fgetc(fichier)) ) && i < 19){
+            while (isalpha( (c = fgetc(fichier)) ) && i < 20){
                 SYM.nom[i++] = c;
             }
             SYM.nom[i]='\0';
@@ -250,6 +251,11 @@ void analyseur_lexical(FILE* fichier){
             else if (strcmp(SYM.nom, "begin") == 0) SYM.Code = BEGIN_TOKEN;
             else if (strcmp(SYM.nom, "end") == 0) SYM.Code = END_TOKEN;
             else if (strcmp(SYM.nom, "read") == 0) SYM.Code = READ_TOKEN;
+            else if (strcmp(SYM.nom,"if")==0) SYM.Code = IF_TOKEN;
+            else if (strcmp(SYM.nom,"then")==0) SYM.Code = THEN_TOKEN;
+            else if (strcmp(SYM.nom,"while")==0) SYM.Code = WHILE_TOKEN;
+            else if (strcmp(SYM.nom,"do")==0) SYM.Code = DO_TOKEN;
+            else if (strcmp(SYM.nom,"write")==0) SYM.Code = WRITE_TOKEN;
 
             else SYM.Code = ID_TOKEN;
 
@@ -394,7 +400,7 @@ void analyseur_syntaxique(){
                 Test_Symbole(PV_TOKEN,PV_ERROR);
              };break;
         case VAR_TOKEN:break;
-        case BEGIN_TOKEN;break;
+        case BEGIN_TOKEN:break;
         default:
          printf("CONST_VAR_BEGIN_ERR \ntriggered from consts function");
 
@@ -408,7 +414,7 @@ void analyseur_syntaxique(){
         case VAR_TOKEN:
             Sym_Suiv();
             Test_Symbole(ID_TOKEN,ID_ERROR);
-            while (SYM.Code == PV_TOKEN){
+            while (SYM.Code == VIRG_TOKEN){
                 Sym_Suiv();
                 Test_Symbole(ID_TOKEN,ID_ERROR);
             }
@@ -425,8 +431,74 @@ void analyseur_syntaxique(){
     void INSTS(){
         Test_Symbole(BEGIN_TOKEN,BEGIN_ERROR);
         INST();
+        while(SYM.Code == PV_TOKEN){
+            INST();
+        }
+        Test_Symbole(END_TOKEN,END_ERROR);
 
     }
+
+    void INST(){
+        switch(SYM.Code){
+            case BEGIN_TOKEN:INSTS();break;
+            case ID_TOKEN:AFFECT();break;
+            case IF_TOKEN:SI();break;
+            case WHILE_TOKEN:TANTQUE();break;
+            case WRITE_TOKEN:ECRIRE();break;
+            case READ_TOKEN:LIRE();break;
+            default:
+                printf("_ERR \ntriggered from INST function");
+
+        }
+    }
+
+    void AFFECT(){
+        switch(SYM.Code){
+            case ID_TOKEN:Sym_Suiv();
+                Test_Symbole(AFFECT_TOKEN,AFFECT_ERROR);
+                EXPR();break;
+            default:
+                printf("EXCPECTED ID_TOKEN \nERROR triggered from AFFECT function");
+        }
+    }
+
+    void SI(){
+        switch(SYM.Code){
+            case IF_TOKEN:
+                COND();
+                Test_Symbole(THEN_TOKEN,THEN_ERROR);
+                INST();break;
+            default:
+                printf("EXCPECTED IF_TOKEN \nERROR triggered from SI function");
+        }
+    }
+
+    void TANTQUE(){
+        if (SYM.Code == WHILE_TOKEN){
+            COND();
+            Test_Symbole(DO_TOKEN,DO_ERROR);
+            INST();
+        }else{
+            printf("EXCPECTED WHILE_TOKEN \nERROR triggered from TANTQUE function");
+        }
+    }
+
+    void ECRIRE(){
+        if (SYM.Code == WRITE_TOKEN){
+                Sym_Suiv();
+                Test_Symbole(PRG_TOKEN,PRG_ERROR);
+                EXPR();                                    //ATENTION SUIVANT OU PAS
+                while(SYM.Code == VIRG_TOKEN){
+                    EXPR();
+                    S
+                }
+
+        }else{
+            printf("EXPECTED WRITE \nERROR triggered from ECRIRE function");
+        }
+
+    }
+
 
 }
 
