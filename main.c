@@ -286,6 +286,42 @@ void analyseur_lexical(FILE* fichier){
             }
 
         }
+        if (c == '<'){
+            if ( (c=fgetc(fichier)) == '='){
+                strcpy(SYM.nom,"<=");
+                SYM.Code = INFEG_TOKEN;
+                AfficherToken(SYM);
+                continue;
+
+            }else{
+            ungetc(c,fichier);
+            }
+
+        }
+        if (c == '>'){
+            if ( (c=fgetc(fichier)) == '='){
+                strcpy(SYM.nom,">=");
+                SYM.Code = SUPEG_TOKEN;
+                AfficherToken(SYM);
+                continue;
+
+            }else{
+            ungetc(c,fichier);
+            }
+
+        }
+        if (c == '<'){
+            if ( (c=fgetc(fichier)) == '>'){
+                strcpy(SYM.nom,"<>");
+                SYM.Code = DIFF_TOKEN;
+                AfficherToken(SYM);
+                continue;
+
+            }else{
+            ungetc(c,fichier);
+            }
+
+        }
 
         switch (c) {
             case ',':
@@ -432,6 +468,7 @@ void analyseur_syntaxique(){
         Test_Symbole(BEGIN_TOKEN,BEGIN_ERROR);
         INST();
         while(SYM.Code == PV_TOKEN){
+            Sym_Suiv();
             INST();
         }
         Test_Symbole(END_TOKEN,END_ERROR);
@@ -490,13 +527,76 @@ void analyseur_syntaxique(){
                 EXPR();                                    //ATENTION SUIVANT OU PAS
                 while(SYM.Code == VIRG_TOKEN){
                     EXPR();
-                    S
+                    Sym_Suiv();
                 }
+                Test_Symbole(PRD_TOKEN,PRD_ERROR);
 
         }else{
             printf("EXPECTED WRITE \nERROR triggered from ECRIRE function");
         }
 
+    }
+    void LIRE(){
+        if (SYM.Code == READ_TOKEN){
+            Sym_Suiv();
+            Test_Symbole(PRG_TOKEN,PRG_ERROR);
+            while (SYM.Code == VIRG_TOKEN){
+                Sym_Suiv();
+                Test_Symbole(ID_TOKEN,ID_ERROR);
+            }
+            Test_Symbole(PRD_TOKEN,PRD_ERROR);
+
+        }else{
+            printf("EXPECTED READ \nERROR triggered from LIRE function");
+        }
+    }
+
+    void COND(){
+        Sym_Suiv();
+        EXPR();
+        switch (SYM.Code){
+            case EGAL_TOKEN:Sym_Suiv();EXPR();break;
+            case DIFF_TOKEN:Sym_Suiv();EXPR();break;
+            case INF_TOKEN:Sym_Suiv();EXPR();break;
+            case SUP_TOKEN:Sym_Suiv();EXPR();break;
+            case INFEG_TOKEN:Sym_Suiv();EXPR();break;
+            case SUPEG_TOKEN:Sym_Suiv();EXPR();break;
+            default:
+                printf("EXPECTED [=| <>| < | >| <=| >=] \nERROR triggered from COND function");
+        }
+
+    }
+
+    void EXPR(){
+        TERM();
+        while (SYM.Code == PLUS_TOKEN ||SYM.Code == MOINS_TOKEN){
+            Sym_Suiv();
+            TERM();
+        }
+
+    }
+
+    void TERM(){
+        FACT();
+         while (SYM.Code == MULTI_TOKEN ||SYM.Code == DIV_TOKEN){
+            Sym_Suiv();
+            FACT();
+        }
+    }
+
+    void FACT(){
+        switch (SYM.Code){
+            case ID_TOKEN:break;
+            case NUM_TOKEN:break;
+            case PRG_TOKEN:
+                Sym_Suiv();
+                EXPR();
+                Test_Symbole(PRD_TOKEN);break;
+            default:
+                printf("EXPECTED ID | NUM | (EXPR) TOKEN | \nERROR triggered from FACT function");
+
+        }
+        Sym_Suiv();
     }
 
 
