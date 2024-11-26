@@ -2,6 +2,29 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include <windows.h>
+
+#ifndef FICHIER_H
+#define FICHIER_H
+
+
+void FACT();
+void TERM();
+void EXPR();
+void COND();
+ void LIRE();
+void ECRIRE();
+void TANTQUE();
+void SI();
+void AFFECT();
+void INST();
+void INSTS();
+void VARS();
+void CONSTS();
+void BLOCK();
+
+#endif
+
 //Code_Lex ENUM
 typedef enum {
     PROGRAM_TOKEN,
@@ -175,6 +198,8 @@ void AfficherToken(TSym_Cour SYM) {
 
 
 void DisplayError(CODE_ERROR error) {
+HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleTextAttribute(hConsole, FOREGROUND_RED);
     switch(error) {
         case PROGRAM_ERROR:   printf("PROGRAM_ERROR\n"); break;
         case VAR_ERROR:       printf("VAR_ERROR\n");     break;
@@ -208,15 +233,11 @@ void DisplayError(CODE_ERROR error) {
         case DIEZE_ERROR:     printf("DIEZE_ERROR\n");   break;
         default:              printf("ERR_ERROR\n");     break;
     }
+    SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+
 }
 
-void Test_Symbole(CODE_LEX cl,CODE_ERROR error){
-    if (TokenArr[index_token] == cl){
-        index_token++;
-    }else{
-        DisplayError(error);
-    }
-}
+
 
 
 
@@ -395,57 +416,97 @@ void analyseur_lexical(FILE* fichier){
     }
 }
 
+TSym_Cour SYM;
 void Sym_Suiv(){
+
     index_token++;
+    SYM.Code = TokenArr[index_token];
+    printf("Sym_Suiv called, current token: %s\n", getTokenString(TokenArr[index_token]));
 }
 
-void analyseur_syntaxique(){
-    TSym_Cour SYM;
+void Test_Symbole(CODE_LEX cl, CODE_ERROR error) {
+    printf("Test_Symbole: Expecting %s, got %s\n", getTokenString(cl), getTokenString(TokenArr[index_token]));
+    if (TokenArr[index_token] == cl) {
 
-    //Program function
-
-    void PROGRAM(){
-        Test_Symbole(PROGRAM_TOKEN,PROGRAM_ERROR);
-        Test_Symbole(ID_TOKEN,ID_ERROR);
-        Test_Symbole(PV_TOKEN,PV_ERROR);
-        BLOCK();
-        Test_Symbole(PT_TOKEN,PT_ERROR);
+        Sym_Suiv();
+    } else {
+        DisplayError(error);
     }
+}
+
+
+void PROGRAM() {
+    index_token =0;
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN);
+    printf("Entering PROGRAM function\n");
+    SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+    Test_Symbole(PROGRAM_TOKEN, PROGRAM_ERROR);
+
+    Test_Symbole(ID_TOKEN, ID_ERROR);
+
+    Test_Symbole(PV_TOKEN, PV_ERROR);
+
+    BLOCK();
+    Test_Symbole(PT_TOKEN, PT_ERROR);
+
+    printf("Exiting PROGRAM function\n");
+}
 
     // BLOCK Program
 
 
-    void BLOCK(){
-        CONSTS();
-        VARS();
-        INSTS();
-    }
+    void BLOCK() {
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN);
+    printf("Entering BLOCK function\n");
+    SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+    CONSTS();
+    VARS();
+    INSTS();
+    printf("Exiting BLOCK function\n");
+}
 
     //1-CONSTS func
-    void CONSTS(){
-        switch(SYM.Code){
-         case CONST_TOKEN:Sym_Suiv();
-             Test_Symbole(ID_TOKEN,ID_ERROR);
-             Test_Symbole(EGAL_TOKEN,EGAL_ERROR);
-             Test_Symbole(NUM_TOKEN,NUM_ERROR);
-             Test_Symbole(PV_TOKEN,PV_ERROR);
-             while(SYM.Code == ID_TOKEN){
+    void CONSTS() {
+        HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+        SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN);
+    printf("Entering CONSTS function with SYM.Code = %s\n", getTokenString(SYM.Code));
+        SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+    switch (SYM.Code) {
+        case CONST_TOKEN:
+
+            Sym_Suiv();
+            Test_Symbole(ID_TOKEN, ID_ERROR);
+            Test_Symbole(EGAL_TOKEN, EGAL_ERROR);
+            Test_Symbole(NUM_TOKEN, NUM_ERROR);
+            Test_Symbole(PV_TOKEN, PV_ERROR);
+            while (SYM.Code == ID_TOKEN) {
+                printf("CONST declaration found\n");
                 Sym_Suiv();
-                Test_Symbole(EGAL_TOKEN,EGAL_ERROR);
-                Test_Symbole(NUM_TOKEN,NUM_ERROR);
-                Test_Symbole(PV_TOKEN,PV_ERROR);
-             };break;
+                Test_Symbole(EGAL_TOKEN, EGAL_ERROR);
+                Test_Symbole(NUM_TOKEN, NUM_ERROR);
+                Test_Symbole(PV_TOKEN, PV_ERROR);
+            }
+            break;
         case VAR_TOKEN:break;
-        case BEGIN_TOKEN:break;
+        case BEGIN_TOKEN:
+            break;
         default:
-         printf("CONST_VAR_BEGIN_ERR \ntriggered from consts function");
-
-        }
-
+            SetConsoleTextAttribute(hConsole, FOREGROUND_RED);
+            printf("Error: Unexpected token in CONSTS function\n");
+            SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
     }
+    printf("Exiting CONSTS function\n");
+}
+
 
 //2-VARS func
     void VARS(){
+        HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+        SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN);
+        printf("Entering VARS function with SYM.Code = %s\n", getTokenString(SYM.Code));
+            SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
         switch(SYM.Code){
         case VAR_TOKEN:
             Sym_Suiv();
@@ -454,28 +515,42 @@ void analyseur_syntaxique(){
                 Sym_Suiv();
                 Test_Symbole(ID_TOKEN,ID_ERROR);
             }
+        Test_Symbole(PV_TOKEN,PV_ERROR);
         case CONST_TOKEN:break;
         case BEGIN_TOKEN:break;
         default:
-            printf("CONST_VAR_BEGIN_ERR \ntriggered from VARS function");
+             SetConsoleTextAttribute(hConsole, FOREGROUND_RED);
+            printf("CONST_VAR_BEGIN_ERR \ntriggered from VARS function\n");
+            SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
         }
 
     }
 
 
 //3-INSTS func
-    void INSTS(){
-        Test_Symbole(BEGIN_TOKEN,BEGIN_ERROR);
-        INST();
-        while(SYM.Code == PV_TOKEN){
-            Sym_Suiv();
-            INST();
-        }
-        Test_Symbole(END_TOKEN,END_ERROR);
+   void INSTS() {
+       HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+       SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN);
+    printf("Entering INSTS function\n");
+        SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+    Test_Symbole(BEGIN_TOKEN, BEGIN_ERROR);
 
+    INST();
+    while (SYM.Code == PV_TOKEN) {
+
+        Sym_Suiv();
+        INST();
     }
+    Test_Symbole(END_TOKEN, END_ERROR);
+
+    printf("Exiting INSTS function\n");
+}
 
     void INST(){
+        HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+        SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN);
+        printf("Entering INST function with SYM.Code = %s\n", getTokenString(SYM.Code));
+            SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
         switch(SYM.Code){
             case BEGIN_TOKEN:INSTS();break;
             case ID_TOKEN:AFFECT();break;
@@ -483,30 +558,47 @@ void analyseur_syntaxique(){
             case WHILE_TOKEN:TANTQUE();break;
             case WRITE_TOKEN:ECRIRE();break;
             case READ_TOKEN:LIRE();break;
+            case END_TOKEN:break;
             default:
-                printf("_ERR \ntriggered from INST function");
+                SetConsoleTextAttribute(hConsole, FOREGROUND_RED);
+            printf("_ERR \ntriggered from INST function\n");
+            SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 
         }
     }
 
-    void AFFECT(){
-        switch(SYM.Code){
-            case ID_TOKEN:Sym_Suiv();
-                Test_Symbole(AFFECT_TOKEN,AFFECT_ERROR);
-                EXPR();break;
-            default:
-                printf("EXCPECTED ID_TOKEN \nERROR triggered from AFFECT function");
-        }
+    void AFFECT() {
+        HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+        SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN);
+    printf("Entering AFFECT function with SYM.Code = %s\n", getTokenString(SYM.Code));
+        SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+    switch (SYM.Code) {
+        case ID_TOKEN:
+
+            Sym_Suiv();
+            Test_Symbole(AFFECT_TOKEN, AFFECT_ERROR);
+
+            EXPR();
+            break;
+        default:
+            SetConsoleTextAttribute(hConsole, FOREGROUND_RED);
+            printf("Error: Expected ID_TOKEN in AFFECT function\n");
+            SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
     }
+    printf("Exiting AFFECT function\n");
+}
 
     void SI(){
+        HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
         switch(SYM.Code){
             case IF_TOKEN:
                 COND();
                 Test_Symbole(THEN_TOKEN,THEN_ERROR);
                 INST();break;
             default:
-                printf("EXCPECTED IF_TOKEN \nERROR triggered from SI function");
+                SetConsoleTextAttribute(hConsole, FOREGROUND_RED);
+            printf("EXCPECTED IF_TOKEN \nERROR triggered from SI function\n");
+            SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
         }
     }
 
@@ -591,7 +683,7 @@ void analyseur_syntaxique(){
             case PRG_TOKEN:
                 Sym_Suiv();
                 EXPR();
-                Test_Symbole(PRD_TOKEN);break;
+                Test_Symbole(PRD_TOKEN,PRD_ERROR);break;
             default:
                 printf("EXPECTED ID | NUM | (EXPR) TOKEN | \nERROR triggered from FACT function");
 
@@ -599,7 +691,11 @@ void analyseur_syntaxique(){
         Sym_Suiv();
     }
 
+void analyseur_syntaxique(){
 
+    SYM.Code = TokenArr[index_token];
+    //Program function
+    PROGRAM();
 }
 
 
@@ -628,10 +724,12 @@ int main(){
 
     analyseur_lexical(fptr);
    /**/
+   analyseur_syntaxique();
 
     return 0;
 
 }
+
 
 
 /* printf("Voici le resultat du tableau");
