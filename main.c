@@ -259,6 +259,40 @@ void analyseur_lexical(FILE* fichier){
     while((c = fgetc(fichier)) != EOF){
 
         if(isspace(c)) continue;
+
+        //comment case
+        if (c=='{'){
+            if ((c=fgetc(fichier)) == '*'){
+
+                while((c=fgetc(fichier)) != EOF){
+                    if (c=='*'){
+                        if ((c=fgetc(fichier))=='}'){
+                            break;
+                        }else{
+                        ungetc(c,fichier);
+                        }
+                    }
+                }
+                if(c==EOF){
+                    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+                    SetConsoleTextAttribute(hConsole, FOREGROUND_RED);
+                    printf("Erreur : fin de fichier atteinte dans un commentaire.\n");
+                    SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+
+                break;
+                }
+
+
+
+            }else{
+                ungetc(c,fichier);
+            }
+            continue;
+        }
+        //end of comment case
+
+
+
         if (c == ':'){
             if ( (c=fgetc(fichier)) == '='){
                 strcpy(SYM.nom,":=");
@@ -420,7 +454,7 @@ void analyseur_lexical(FILE* fichier){
             continue;
         }
         SYM.Code = ERR_TOKEN;
-        printf(SYM.nom, "%c", c);
+        printf(SYM.nom, "%c l'erreur", c);
         AfficherToken(SYM);
 
     }
@@ -741,9 +775,17 @@ int main(){
 
     analyseur_lexical(fptr);
    /**/
-   analyseur_syntaxique();
+   //analyseur_syntaxique();
+
+printf("Voici le resultat du tableau");
 
 
+    printf("\n");
+    for (int k=0;k<=index_token;k++){
+        if (strcmp(getTokenString(TokenArr[k]),"PT_TOKEN") == 0)break;
+        printf("%s\n",getTokenString(TokenArr[k]));
+
+    }
 
 
 
