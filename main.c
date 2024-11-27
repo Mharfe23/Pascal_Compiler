@@ -41,6 +41,7 @@ typedef enum {
     AFFECT_TOKEN,
     THEN_TOKEN,
     IF_TOKEN,
+    ELSE_TOKEN,
     WHILE_TOKEN,
     WRITE_TOKEN,
     READ_TOKEN,
@@ -77,6 +78,7 @@ typedef enum {
     AFFECT_ERROR,
     THEN_ERROR,
     IF_ERROR,
+    ELSE_ERROR,
     WHILE_ERROR,
     WRITE_ERROR,
     READ_ERROR,
@@ -121,6 +123,7 @@ char* getTokenString(CODE_LEX token) {
         "AFFECT_TOKEN",
         "THEN_TOKEN",
         "IF_TOKEN",
+        "ELSE_TOKEN",
         "WHILE_TOKEN",
         "WRITE_TOKEN",
         "READ_TOKEN",
@@ -169,6 +172,7 @@ void AfficherToken0(TSym_Cour SYM){
 	   case AFFECT_TOKEN:    printf("%s          %s\n","  :=   ","AFFECT_TOKEN"); break;
 	   case THEN_TOKEN:      printf("%s          %s\n",SYM.nom,"THEN_TOKEN");     break;
 	   case IF_TOKEN:        printf("%s          %s\n",SYM.nom,"IF_TOKEN");       break;
+	   case ELSE_TOKEN:      printf("%s          %s\n",SYM.nom,"ELSE_TOKEN");     break;
 	   case WHILE_TOKEN:     printf("%s          %s\n",SYM.nom,"WHILE_TOKEN ");   break;
 	   case WRITE_TOKEN:     printf("%s          %s\n",SYM.nom,"WRITE_TOKEN ");   break;
 	   case READ_TOKEN:      printf("%s          %s\n",SYM.nom,"READ_TOKEN ");    break;
@@ -198,7 +202,7 @@ void AfficherToken(TSym_Cour SYM) {
 
 
 void DisplayError(CODE_ERROR error) {
-HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     SetConsoleTextAttribute(hConsole, FOREGROUND_RED);
     switch(error) {
         case PROGRAM_ERROR:   printf("PROGRAM_ERROR\n"); break;
@@ -215,6 +219,7 @@ HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
         case AFFECT_ERROR:    printf("AFFECT_ERROR\n");  break;
         case THEN_ERROR:      printf("THEN_ERROR\n");    break;
         case IF_ERROR:        printf("IF_ERROR\n");      break;
+        case ELSE_ERROR:      printf("ELSE_ERROR\n");      break;
         case WHILE_ERROR:     printf("WHILE_ERROR\n");   break;
         case WRITE_ERROR:     printf("WRITE_ERROR\n");   break;
         case READ_ERROR:      printf("READ_ERROR\n");    break;
@@ -254,47 +259,6 @@ void analyseur_lexical(FILE* fichier){
     while((c = fgetc(fichier)) != EOF){
 
         if(isspace(c)) continue;
-
-        if(isalpha(c)){
-
-            int i = 0;
-            SYM.nom[i++] = c;
-            while (isalpha( (c = fgetc(fichier)) ) && i < 20){
-                SYM.nom[i++] = c;
-            }
-            SYM.nom[i]='\0';
-
-            ungetc(c,fichier);
-
-            if (strcmp(SYM.nom,"program") == 0)SYM.Code = PROGRAM_TOKEN;
-            else if (strcmp(SYM.nom, "var") == 0) SYM.Code = VAR_TOKEN;
-            else if (strcmp(SYM.nom, "const") == 0) SYM.Code = CONST_TOKEN;
-            else if (strcmp(SYM.nom, "begin") == 0) SYM.Code = BEGIN_TOKEN;
-            else if (strcmp(SYM.nom, "end") == 0) SYM.Code = END_TOKEN;
-            else if (strcmp(SYM.nom, "read") == 0) SYM.Code = READ_TOKEN;
-            else if (strcmp(SYM.nom,"if")==0) SYM.Code = IF_TOKEN;
-            else if (strcmp(SYM.nom,"then")==0) SYM.Code = THEN_TOKEN;
-            else if (strcmp(SYM.nom,"while")==0) SYM.Code = WHILE_TOKEN;
-            else if (strcmp(SYM.nom,"do")==0) SYM.Code = DO_TOKEN;
-            else if (strcmp(SYM.nom,"write")==0) SYM.Code = WRITE_TOKEN;
-
-            else SYM.Code = ID_TOKEN;
-
-            AfficherToken(SYM);
-            continue;
-        }
-        if (isdigit(c)){
-            int i = 0;
-            SYM.nom[i++] = c;
-            while(isdigit(c = fgetc(fichier) )&& i < 19){
-                SYM.nom[i++] = c;
-            }
-            SYM.nom[i] = '\0';
-            SYM.Code = NUM_TOKEN;
-            ungetc(c,fichier);
-            AfficherToken(SYM);
-            continue;
-        }
         if (c == ':'){
             if ( (c=fgetc(fichier)) == '='){
                 strcpy(SYM.nom,":=");
@@ -348,70 +312,116 @@ void analyseur_lexical(FILE* fichier){
             case ',':
                 SYM.Code = VIRG_TOKEN;
                 strcpy(SYM.nom,",");
-                AfficherToken(SYM);
+                AfficherToken(SYM);continue;
 
             case ';':
                 SYM.Code = PV_TOKEN;
                 strcpy(SYM.nom, ";");
                 AfficherToken(SYM);
-                break;
+                continue;
             case '.':
                 SYM.Code = PT_TOKEN;
                 strcpy(SYM.nom, ".");
                 AfficherToken(SYM);
-                break;
+                continue;
             case '=':
                 SYM.Code = EGAL_TOKEN;
                 strcpy(SYM.nom, "=");
                 AfficherToken(SYM);
-                break;
+                continue;
             case '+':
                 SYM.Code = PLUS_TOKEN;
                 strcpy(SYM.nom,"+");
                 AfficherToken(SYM);
-                break;
+                continue;
             case '-':
                 SYM.Code = MOINS_TOKEN;
                 strcpy(SYM.nom, "-");
                 AfficherToken(SYM);
-                break;
+                continue;
             case '*':
                 SYM.Code = MULTI_TOKEN;
                 strcpy(SYM.nom, "*");
                 AfficherToken(SYM);
-                break;
+                continue;
             case '/':
                 SYM.Code = DIV_TOKEN;
                 strcpy(SYM.nom, "/");
                 AfficherToken(SYM);
-                break;
+                continue;
             case '(':
                 SYM.Code = PRG_TOKEN;
                 strcpy(SYM.nom, "(");
                 AfficherToken(SYM);
-                break;
+                continue;
             case ')':
                 SYM.Code = PRD_TOKEN;
                 strcpy(SYM.nom, ")");
                 AfficherToken(SYM);
-                break;
+                continue;
             case '<':
                 SYM.Code = INF_TOKEN;
                 strcpy(SYM.nom, "<");
                 AfficherToken(SYM);
-                break;
+                continue;
             case '>':
                 SYM.Code = SUP_TOKEN;
                 strcpy(SYM.nom, ">");
                 AfficherToken(SYM);
-                break;
+                continue;
 
-            default:
+            /*default:
                 SYM.Code = ERR_TOKEN;
                 sprintf(SYM.nom, "%c", c);
                 AfficherToken(SYM);
-                break;
+                break;*/
         }
+
+        if(isalpha(c)){
+
+            int i = 0;
+            SYM.nom[i++] = c;
+            while (isalpha( (c = fgetc(fichier)) ) && i < 20){
+                SYM.nom[i++] = c;
+            }
+            SYM.nom[i]='\0';
+
+            ungetc(c,fichier);
+
+            if (strcmp(SYM.nom,"program") == 0)SYM.Code = PROGRAM_TOKEN;
+            else if (strcmp(SYM.nom, "var") == 0) SYM.Code = VAR_TOKEN;
+            else if (strcmp(SYM.nom, "const") == 0) SYM.Code = CONST_TOKEN;
+            else if (strcmp(SYM.nom, "begin") == 0) SYM.Code = BEGIN_TOKEN;
+            else if (strcmp(SYM.nom, "end") == 0) SYM.Code = END_TOKEN;
+            else if (strcmp(SYM.nom, "read") == 0) SYM.Code = READ_TOKEN;
+            else if (strcmp(SYM.nom,"if")==0) SYM.Code = IF_TOKEN;
+            else if (strcmp(SYM.nom,"else")==0) SYM.Code = ELSE_TOKEN;
+            else if (strcmp(SYM.nom,"then")==0) SYM.Code = THEN_TOKEN;
+            else if (strcmp(SYM.nom,"while")==0) SYM.Code = WHILE_TOKEN;
+            else if (strcmp(SYM.nom,"do")==0) SYM.Code = DO_TOKEN;
+            else if (strcmp(SYM.nom,"write")==0) SYM.Code = WRITE_TOKEN;
+
+            else SYM.Code = ID_TOKEN;
+
+            AfficherToken(SYM);
+            continue;
+        }
+
+        if (isdigit(c)){
+            int i = 0;
+            SYM.nom[i++] = c;
+            while(isdigit(c = fgetc(fichier) )&& i < 19){
+                SYM.nom[i++] = c;
+            }
+            SYM.nom[i] = '\0';
+            SYM.Code = NUM_TOKEN;
+            ungetc(c,fichier);
+            AfficherToken(SYM);
+            continue;
+        }
+        SYM.Code = ERR_TOKEN;
+        printf(SYM.nom, "%c", c);
+        AfficherToken(SYM);
 
     }
 }
@@ -441,6 +451,8 @@ void PROGRAM() {
     SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN);
     printf("Entering PROGRAM function\n");
     SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+
+
     Test_Symbole(PROGRAM_TOKEN, PROGRAM_ERROR);
 
     Test_Symbole(ID_TOKEN, ID_ERROR);
@@ -461,6 +473,7 @@ void PROGRAM() {
     SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN);
     printf("Entering BLOCK function\n");
     SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+
     CONSTS();
     VARS();
     INSTS();
@@ -506,7 +519,9 @@ void PROGRAM() {
         HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
         SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN);
         printf("Entering VARS function with SYM.Code = %s\n", getTokenString(SYM.Code));
-            SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+        SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+
+
         switch(SYM.Code){
         case VAR_TOKEN:
             Sym_Suiv();
@@ -570,8 +585,9 @@ void PROGRAM() {
     void AFFECT() {
         HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
         SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN);
-    printf("Entering AFFECT function with SYM.Code = %s\n", getTokenString(SYM.Code));
+        printf("Entering AFFECT function with SYM.Code = %s\n", getTokenString(SYM.Code));
         SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+
     switch (SYM.Code) {
         case ID_TOKEN:
 
@@ -632,6 +648,7 @@ void PROGRAM() {
         if (SYM.Code == READ_TOKEN){
             Sym_Suiv();
             Test_Symbole(PRG_TOKEN,PRG_ERROR);
+            Test_Symbole(ID_TOKEN,ID_ERROR);
             while (SYM.Code == VIRG_TOKEN){
                 Sym_Suiv();
                 Test_Symbole(ID_TOKEN,ID_ERROR);
@@ -725,6 +742,10 @@ int main(){
     analyseur_lexical(fptr);
    /**/
    analyseur_syntaxique();
+
+
+
+
 
     return 0;
 
