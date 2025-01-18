@@ -2,6 +2,7 @@ program test;
 const tata=12; titi=123;
 {*dwvsvjsjvsnjvs*}
 var x;
+const m
 begin
    x:=tata+titi;
    write(x);
