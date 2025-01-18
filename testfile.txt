@@ -4,8 +4,6 @@ var x;
 begin
    read(x);
    if x<=12 then x:=0;
-   else x := 5;
-   
    write(x);
 {*dwvsvjsjvsnjvs*}
 end.

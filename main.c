@@ -102,9 +102,10 @@ typedef enum {
 typedef struct {
     CODE_LEX Code;
     char nom[20];
+    int val;
 } TSym_Cour;
 
-CODE_LEX TokenArr[1024];
+TSym_Cour TokenArr[1024];
 int index_token = 0;
 
 char* getTokenString(CODE_LEX token) {
@@ -196,7 +197,7 @@ void AfficherToken0(TSym_Cour SYM){
 }
 
 void AfficherToken(TSym_Cour SYM) {
-    TokenArr[index_token] = SYM.Code;
+    TokenArr[index_token] = SYM;
     index_token++;
 }
 
@@ -241,9 +242,6 @@ void DisplayError(CODE_ERROR error) {
     SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 
 }
-
-
-
 
 
 
@@ -449,6 +447,7 @@ void analyseur_lexical(FILE* fichier){
             }
             SYM.nom[i] = '\0';
             SYM.Code = NUM_TOKEN;
+            SYM.val=atoi(SYM.nom);
             ungetc(c,fichier);
             AfficherToken(SYM);
             continue;
@@ -464,13 +463,13 @@ TSym_Cour SYM;
 void Sym_Suiv(){
 
     index_token++;
-    SYM.Code = TokenArr[index_token];
-    //printf("Sym_Suiv called, current token: %s\n", getTokenString(TokenArr[index_token]));
+    SYM = TokenArr[index_token];
+    printf("Sym_Suiv called, current token: %s\n", getTokenString(TokenArr[index_token].Code));
 }
 
 void Test_Symbole(CODE_LEX cl, CODE_ERROR error) {
-    //printf("Test_Symbole: Expecting %s, got %s\n", getTokenString(cl), getTokenString(TokenArr[index_token]));
-    if (TokenArr[index_token] == cl) {
+    printf("Test_Symbole: Expecting %s, got %s\n", getTokenString(cl), getTokenString(TokenArr[index_token].Code));
+    if (TokenArr[index_token].Code == cl) {
 
         Sym_Suiv();
     } else {
@@ -641,12 +640,15 @@ void PROGRAM() {
 
     void SI(){
         HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+        SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN);
+        printf("Entering IF function with SYM.Code = %s\n", getTokenString(SYM.Code));
+        SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
         switch(SYM.Code){
             case IF_TOKEN:
                 COND();
                 Test_Symbole(THEN_TOKEN,THEN_ERROR);
                 INST();
-                Sym_Suiv();
+
                 if (SYM.Code == ELSE_TOKEN){
                         Sym_Suiv();
                         SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN);
@@ -754,7 +756,7 @@ void PROGRAM() {
 
 void analyseur_syntaxique(){
 
-    SYM.Code = TokenArr[index_token];
+    SYM = TokenArr[index_token];
     //Program function
     PROGRAM();
 }
