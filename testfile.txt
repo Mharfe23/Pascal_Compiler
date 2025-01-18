@@ -1,11 +1,12 @@
 program test;
-const tata=12; titi=123;
-{*dwvsvjsjvsnjvs*}
+const tata=12;
 var x;
-const m
 begin
-   x:=tata+titi;
+   read(x);
+   if x<=12 then x:=0;
+   else x := 5;
+   
    write(x);
+{*dwvsvjsjvsnjvs*}
 end.
-
 

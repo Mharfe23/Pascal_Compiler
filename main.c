@@ -465,11 +465,11 @@ void Sym_Suiv(){
 
     index_token++;
     SYM.Code = TokenArr[index_token];
-    printf("Sym_Suiv called, current token: %s\n", getTokenString(TokenArr[index_token]));
+    //printf("Sym_Suiv called, current token: %s\n", getTokenString(TokenArr[index_token]));
 }
 
 void Test_Symbole(CODE_LEX cl, CODE_ERROR error) {
-    printf("Test_Symbole: Expecting %s, got %s\n", getTokenString(cl), getTokenString(TokenArr[index_token]));
+    //printf("Test_Symbole: Expecting %s, got %s\n", getTokenString(cl), getTokenString(TokenArr[index_token]));
     if (TokenArr[index_token] == cl) {
 
         Sym_Suiv();
@@ -609,9 +609,10 @@ void PROGRAM() {
             case READ_TOKEN:LIRE();break;
             case END_TOKEN:break;
             default:
+                break;/*
                 SetConsoleTextAttribute(hConsole, FOREGROUND_RED);
             printf("_ERR \ntriggered from INST function\n");
-            SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+            SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);*/
 
         }
     }
@@ -644,7 +645,16 @@ void PROGRAM() {
             case IF_TOKEN:
                 COND();
                 Test_Symbole(THEN_TOKEN,THEN_ERROR);
-                INST();break;
+                INST();
+                Sym_Suiv();
+                if (SYM.Code == ELSE_TOKEN){
+                        Sym_Suiv();
+                        SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN);
+                        printf("Entering Else with SYM.Code = %s\n", getTokenString(SYM.Code));
+                        SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+                        INST();
+                }
+                break;
             default:
                 SetConsoleTextAttribute(hConsole, FOREGROUND_RED);
             printf("EXCPECTED IF_TOKEN \nERROR triggered from SI function\n");
