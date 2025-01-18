@@ -603,6 +603,7 @@ void PROGRAM() {
             case BEGIN_TOKEN:INSTS();break;
             case ID_TOKEN:AFFECT();break;
             case IF_TOKEN:SI();break;
+            case ELSE_TOKEN:break;
             case WHILE_TOKEN:TANTQUE();break;
             case WRITE_TOKEN:ECRIRE();break;
             case READ_TOKEN:LIRE();break;
