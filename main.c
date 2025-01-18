@@ -454,7 +454,7 @@ void analyseur_lexical(FILE* fichier){
             continue;
         }
         SYM.Code = ERR_TOKEN;
-        printf(SYM.nom, "%c l'erreur", c);
+        printf("%c l'erreur", c);
         AfficherToken(SYM);
 
     }
@@ -775,17 +775,7 @@ int main(){
 
     analyseur_lexical(fptr);
    /**/
-   //analyseur_syntaxique();
-
-printf("Voici le resultat du tableau");
-
-
-    printf("\n");
-    for (int k=0;k<=index_token;k++){
-        if (strcmp(getTokenString(TokenArr[k]),"PT_TOKEN") == 0)break;
-        printf("%s\n",getTokenString(TokenArr[k]));
-
-    }
+   analyseur_syntaxique();
 
 
 
